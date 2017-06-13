@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>cronometro</title>
+		<script type="text/javascript" src="jquery.min.js"></script>
+		<script type="text/javascript" src="jquery.timer.js"></script>
+		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+		<style>
+			*{
+				text-align: center;
+				background-color: rgba(51, 51, 51, 1);
+				color: white;
+				padding: 0;
+				margin: 0 auto;
+				font-family: Verdana;
+			}
+			.container{
+				width: 100%;
+				height: 100%;
+				margin: 0 auto;
+			}
+
+			.title{
+				padding-top: 5%;
+			}
+
+			.set{
+				width: 100%;
+				height: 100%;
+				margin-top: 5%;
+				padding: 10px;
+			}
+
+			.get{
+				width: 50%;
+				height: 100%;
+				margin: 0 auto;
+			}
+
+			.result{
+				width: 160px;
+				height: 160px;
+				margin-top: 5%;
+				padding: 10%;
+				border: 2px solid red;
+				border-radius: 100%;
+				font-size: 2.5em;
+			}
+			#conteo{
+				padding-top: 10%;
+			}
+			.assign{
+				width: 45%;
+				/*height: 90px;*/
+				margin: 0 auto;
+				display: inline-block;
+				font-size: 0.7em;
+				max-width: 188px;
+			}
+
+			.mas, .menos{
+				cursor: pointer;
+				width: 25%;
+				font-size: 1.5em;
+			}
+
+			.valor{
+				font-size: 2em;
+			}
+
+			input{
+				border: none;
+				padding: 10px 0 0 0;
+				width: 30%;
+				background: none;
+			}
+
+			input:focus{
+				outline: none;
+			}
+
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="title">
+				<h1>Cronometro Ceballos</h1>
+			</div>
+			<div class="set">
+				<div class="assign" id="break">
+					<p>BREAK LENGTH</p>
+					<form action="" id="example2form">
+						<input type="button" class="menos" id="menosB" value="-">
+					<input type="text" class="valor" id="inBreak" value="3" maxlength="3" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+					<input type="button" class="mas" id="masB" value="+">
+					</form>
+					
+				</div>
+				<div class="assign" id="Session">
+					<p>SESSION LENGTH</p>
+					<form action="">
+						
+					<input type="button" class="menos" id="menosS" value="-">
+					<input type="text" class="valor" id="inSession" value="30" maxlength="3" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+					<input type="button" class="mas" id="masS" value="+">
+					</form>
+				</div>
+			</div>
+			<div class="get">
+				<div class="result" onclick="Example2.Timer.toggle();">
+					<p>Session</p>
+					<h2 id="conteo">30</h2>
+				</div>
+			</div>
+		</div>
+		
+	<script>
+		$('#masB').click(function(){
+			var valor = parseInt($("#inBreak").val())+1;
+			if (valor < 1000) {
+				$("#inBreak").val(valor);
+			}
+		});
+		
+		$('#menosB').click(function(){
+			var valor = parseInt($("#inBreak").val())-1;
+			if (valor > 0) {
+				$("#inBreak").val(valor);
+			}
+		});
+
+		$('#masS').click(function(){
+			var valor = parseInt($("#inSession").val())+1;
+			if (valor < 1000) {
+				$("#inSession").val(valor);
+				$("#conteo").text(valor);
+			}
+		});
+
+		$('#menosS').click(function(){
+			var valor = parseInt($("#inSession").val())-1;
+			if (valor > 0) {
+				$("#inSession").val(valor);
+				$("#conteo").text(valor);
+			}
+		});
+
+
+
+
+
+		/**
+ * Example 2 is similar to Example 1. Two things that are
+ * different are counting down instead of up and allowing
+ * user input for start time. Also, when the timer counts
+ * down to zero, an alert is triggered.
+ */
+
+
+// Common functions
+function pad(number, length) {
+    var str = '' + number;
+    while (str.length < length) {str = '0' + str;}
+    return str;
+}
+function formatTime(time) {
+    time = time / 10;
+    var min = parseInt(time / 6000),
+        sec = parseInt(time / 100) - (min * 60),
+        hundredths = pad(time - (sec * 100) - (min * 6000), 2);
+    return (min > 0 ? pad(min, 1)+':' : "")  + pad(sec, 2);
+}
+
+var Example2 = new (function() {
+
+    var $countdown;
+    var $form;
+    var incrementTime = 70;
+    var currentTime = $("#conteo").text() * 1000; 
+    
+    $(function() {
+
+        // Setup the timer
+        $countdown = $('#conteo');
+        Example2.Timer = $.timer(updateTimer, incrementTime, true);
+
+        // Setup form
+        $form = $('#example2form');
+        $form.bind('submit', function() {
+            Example2.resetCountdown();
+            return false;
+        });
+
+    });
+
+    function updateTimer() {
+
+        // Output timer position
+        var timeString = formatTime(currentTime);
+        $countdown.html(timeString);
+
+        // If timer is complete, trigger alert
+        if (currentTime == 0) {
+            Example2.Timer.stop();
+            // alert('Example 2: Countdown timer complete!');
+            Example2.resetCountdown();
+            return;
+        }
+
+        // Increment timer position
+        currentTime -= incrementTime;
+        if (currentTime < 0) currentTime = 0;
+
+    }
+
+    this.resetCountdown = function() {
+
+        // Get time from form
+        var newTime = parseInt($form.find('input[type=text]').val()) * 1000;
+        if (newTime > 0) {currentTime = newTime;}
+
+        // Stop and reset timer
+        Example2.Timer.stop().once();
+
+    };
+
+});
+
+	</script>
+
+	</body>
+</html>
